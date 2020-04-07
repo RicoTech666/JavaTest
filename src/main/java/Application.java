@@ -39,7 +39,7 @@ public class Application {
       System.out.format("已将您的车牌号为%s的车辆停到%s停车场%s号车位，停车券为：%s，请您妥善保存。\n", ticketDetails[2], ticketDetails[0], ticketDetails[1], ticket);
     }
     else if (choice.equals("3")) {
-      System.out.println("请输入停车券信息\n格式为\"停车场编号1,车位编号,车牌号\" 如 \"A,1,8\"：");
+      System.out.println("请输入停车券信息\n格式为\"停车场编号1,车位编号,车牌号\" 如 \"A,1,A12098\"：");
       String ticket = scanner.next();
       String car = fetch(ticket);
       System.out.format("已为您取到车牌号为%s的车辆，很高兴为您服务，祝您生活愉快!\n", car);
@@ -56,7 +56,7 @@ public class Application {
   public static String park(String carNumber) throws SQLException {
       QueryController queryController = new QueryController();
       if(queryController.checkIfIsFull()) {
-          throw new ParkingLotFullException("停车场已没有空位，暂时无法停车");
+          throw new ParkingLotFullException("非常抱歉，由于车位已满，暂时无法为您停车！");
       } else if(queryController.shouldParkInA()){
           return queryController.getTicketForA("A",carNumber) + carNumber;
       } else {
@@ -64,8 +64,9 @@ public class Application {
       }
   }
 
-  public static String fetch(String ticket) {
-    return "";
+  public static String fetch(String ticket) throws SQLException {
+    QueryController queryController = new QueryController();
+    return queryController.fetchCars(ticket);
   }
 
 }

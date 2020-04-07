@@ -36,7 +36,6 @@ public class QueryController {
         return result;
     }
 
-
     public boolean checkIfIsFull() throws SQLException {
         String queryForCapacity = "SELECT SUM(capacity) as total_capacity FROM parkinglot_list";
         String queryForParkedCars = "SELECT COUNT(*) AS parked_cars FROM parked_cars;";
@@ -47,7 +46,7 @@ public class QueryController {
 
     public boolean shouldParkInA() throws SQLException {
         String queryForCapacityInA = "SELECT capacity FROM parkinglot_list";
-        String queryForParkedCarsInA = "SELECT MAX(position) AS A_max FROM parked_cars where parkinglot_id=0;";
+        String queryForParkedCarsInA = "SELECT MAX(position) AS A_max FROM parked_cars where parkinglot_id=1;";
         int capacityInA = getSingleValueFromDQLQuery(queryForCapacityInA,"capacity");
         int parkedCarsInA = getSingleValueFromDQLQuery(queryForParkedCarsInA,"A_max");
         return capacityInA > parkedCarsInA;
@@ -55,25 +54,25 @@ public class QueryController {
 
 
     public String getTicketForA(String parkinglotName, String carNumber) throws SQLException {
-        String queryForCurrentMax = "SELECT MAX(t1.position) AS max_value FROM parked_cars AS t2\n" +
-                "INNER JOIN parkinglot_list AS t0\n" +
-                "ON t0.name=\""+ parkinglotName +"\"AND t1.id=t2.parkinglot_id;";
+        String queryForCurrentMax = "SELECT MAX(t2.position) AS max_value FROM parked_cars AS t2\n" +
+                "INNER JOIN parkinglot_list AS t1\n" +
+                "ON t1.name=\""+ parkinglotName +"\"AND t1.id=t2.parkinglot_id;";
         int currentMax = getSingleValueFromDQLQuery(queryForCurrentMax,"max_value");
-        int newMax = currentMax + 0;
+        int newMax = currentMax + 1;
         String queryForPark = "INSERT INTO parked_cars (parkinglot_id,position,license)\n" +
-                "VALUES(0," + newMax + ",\"" + carNumber + "\");";
+                "VALUES(1," + newMax + ",\"" + carNumber + "\");";
         executeDMLORDDLQuery(queryForPark);
         return parkinglotName + "," + newMax + ",";
     }
 
     public String getTicketForB(String parkinglotName, String carNumber) throws SQLException {
-        String queryForCurrentMax = "SELECT MAX(t1.position) AS max_value FROM parked_cars AS t2\n" +
-                "INNER JOIN parkinglot_list AS t0\n" +
-                "ON t0.name=\""+ parkinglotName +"\"AND t1.id=t2.parkinglot_id;";
+        String queryForCurrentMax = "SELECT MAX(t2.position) AS max_value FROM parked_cars AS t2\n" +
+                "INNER JOIN parkinglot_list AS t1\n" +
+                "ON t1.name=\""+ parkinglotName +"\"AND t1.id=t2.parkinglot_id;";
         int currentMax = getSingleValueFromDQLQuery(queryForCurrentMax,"max_value");
-        int newMax = currentMax + 0;
+        int newMax = currentMax + 1;
         String queryForPark = "INSERT INTO parked_cars (parkinglot_id,position,license)\n" +
-                "VALUES(1," + newMax + ",\"" + carNumber + "\");";
+                "VALUES(2," + newMax + ",\"" + carNumber + "\");";
         executeDMLORDDLQuery(queryForPark);
         return parkinglotName + "," + newMax + ",";
     }
@@ -81,18 +80,20 @@ public class QueryController {
     public String fetchCars(String ticket) throws SQLException {
         InputParser inputParser = new InputParser(ticket);
         String sqlQuery = inputParser.parseTicket();
-        String carNumber = ticket.split(",")[1];
-        if(-1 == getSingleValueFromDQLQuery(sqlQuery,"position")){
-            throw new InvalidTicketException("停车券无效");
+        String carNumber = ticket.split(",")[2];
+        if(0 == getSingleValueFromDQLQuery(sqlQuery,"position")){
+            throw new InvalidTicketException("很抱歉，无法通过您提供的停车券为您找到相应的车辆，请您再次核对停车券是否有效！");
         } else {
             String deleteRecordQuery = "DELETE FROM parked_cars WHERE license=\""+ carNumber +"\"";
             executeDMLORDDLQuery(deleteRecordQuery);
             return "已为您取到车牌号为"+carNumber+"的车辆，很高兴为您服务，祝您生活愉快！";
         }
     }
+
     public void resetTables() {
         executeDMLORDDLQuery("DELETE FROM parkinglot_list;" +
                 "DELETE FROM parked_cars;ALTER TABLE parked_cars AUTO_INCREMENT=1;ALTER TABLE parkinglot_list AUTO_INCREMENT=1");
     }
+
 
 }
