@@ -1,3 +1,6 @@
+import Classes.InputParser;
+import Classes.QueryController;
+
 import java.util.Scanner;
 
 public class Application {
@@ -42,7 +45,10 @@ public class Application {
   }
 
   public static void init(String initInfo) {
-
+    InputParser inputParser = new InputParser(initInfo);
+    QueryController queryController = new QueryController();
+    queryController.resetTables();
+    queryController.executeDMLORDDLQuery(inputParser.parseInit());
   }
 
   public static String park(String carNumber) {
