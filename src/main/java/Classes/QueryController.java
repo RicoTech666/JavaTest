@@ -86,7 +86,7 @@ public class QueryController {
         } else {
             String deleteRecordQuery = "DELETE FROM parked_cars WHERE license=\""+ carNumber +"\"";
             executeDMLORDDLQuery(deleteRecordQuery);
-            return "已为您取到车牌号为"+carNumber+"的车辆，很高兴为您服务，祝您生活愉快！";
+            return carNumber;
         }
     }
 
