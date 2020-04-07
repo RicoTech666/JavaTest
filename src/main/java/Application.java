@@ -1,15 +1,17 @@
 import Classes.InputParser;
 import Classes.QueryController;
+import exception.ParkingLotFullException;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Application {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws SQLException {
     operateParking();
   }
 
-  public static void operateParking() {
+  public static void operateParking() throws SQLException {
     while (true) {
       System.out.println("1. 初始化停车场数据\n2. 停车\n3. 取车\n4. 退出\n请输入你的选择(1~4)：");
       Scanner printItem = new Scanner(System.in);
@@ -22,7 +24,7 @@ public class Application {
     }
   }
 
-  private static void handle(String choice) {
+  private static void handle(String choice) throws SQLException {
     Scanner scanner = new Scanner(System.in);
     if (choice.equals("1")) {
       System.out.println("请输入初始化数据\n格式为\"停车场编号1：车位数,停车场编号2：车位数\" 如 \"A:8,B:9\"：");
@@ -51,8 +53,15 @@ public class Application {
     queryController.executeDMLORDDLQuery(inputParser.parseInit());
   }
 
-  public static String park(String carNumber) {
-    return "";
+  public static String park(String carNumber) throws SQLException {
+      QueryController queryController = new QueryController();
+      if(queryController.checkIfIsFull()) {
+          throw new ParkingLotFullException("停车场已没有空位，暂时无法停车");
+      } else if(queryController.shouldParkInA()){
+          return queryController.getTicketForA("A",carNumber) + carNumber;
+      } else {
+          return queryController.getTicketForB("B",carNumber) + carNumber;
+      }
   }
 
   public static String fetch(String ticket) {
