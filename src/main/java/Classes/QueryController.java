@@ -45,7 +45,7 @@ public class QueryController {
     }
 
     public boolean shouldParkInA() throws SQLException {
-        String queryForCapacityInA = "SELECT capacity FROM parkinglot_list";
+        String queryForCapacityInA = "SELECT capacity FROM parkinglot_list WHERE name=\"A\"";
         String queryForParkedCarsInA = "SELECT MAX(position) AS A_max FROM parked_cars where parkinglot_id=1;";
         int capacityInA = getSingleValueFromDQLQuery(queryForCapacityInA,"capacity");
         int parkedCarsInA = getSingleValueFromDQLQuery(queryForParkedCarsInA,"A_max");
@@ -94,6 +94,5 @@ public class QueryController {
         executeDMLORDDLQuery("DELETE FROM parkinglot_list;" +
                 "DELETE FROM parked_cars;ALTER TABLE parked_cars AUTO_INCREMENT=1;ALTER TABLE parkinglot_list AUTO_INCREMENT=1");
     }
-
 
 }
